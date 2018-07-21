@@ -8,18 +8,50 @@ output:
 
 ## Loading and preprocessing the data
 
+```{r echo=TRUE}
+activity <- read.csv("activity.csv", stringsAsFactors = FALSE)
+str(activity)
+summary(activity)
+```
 
 
 ## What is mean total number of steps taken per day?
 
+```{r echo = TRUE}
+totalSteps<-aggregate(steps~date,data=activity,sum,na.rm=TRUE)
+totalSteps
+mean(totalSteps$steps)
+```
 
 
 ## What is the average daily activity pattern?
+```{r echo=TRUE}
+stepsInterval<-aggregate(steps~interval,data=activity,mean,na.rm=TRUE)
+stepsInterval
+plot(steps~interval,data=stepsInterval,type="l")
+```
 
 
 
 ## Imputing missing values
 
+```{r echo=TRUE}
+activityMissingFilled <- activity
+activityMissingFilled$steps[is.na(activity$steps)] <- mean(activity$steps,na.rm = TRUE)
 
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r echo=TRUE}
+library(lattice)
+library(chron)
+library(timeDate)
+activityMissingFilled$typeOfDay[isWeekday(as.Date(activityMissingFilled$date))] <- "weekday"
+activityMissingFilled$typeOfDay[!isWeekday(as.Date(activityMissingFilled$date))] <- "weekend"
+activityMissingFilled$typeOfDay <- as.factor(activityMissingFilled$typeOfDay)
+table(activityMissingFilled$typeOfDay)
+
+xyplot(steps~interval | factor(typeOfDay), data = activityMissingFilled, aspect = 1/2, type = "l")
+
+```
+
